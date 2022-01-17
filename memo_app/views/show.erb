@@ -1,0 +1,22 @@
+<div>
+  <h1>
+    <%= @title %>
+  </h1>
+</div>
+<div>
+  <h2>
+    <%= @content %>
+  </h2>
+</div>
+<div>
+  <a href="/memos/<%= @id %>/edit">編集</a>
+</div>
+<div>
+  <form action="/memos/<%= @id %>" method="post">
+    <input type="hidden" name="_method" value="DELETE">
+    <input type="submit" value="削除">
+  </form>
+</div>
+<div>
+  <a href="/memos">戻る</a>
+</div>
