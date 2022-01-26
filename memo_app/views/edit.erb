@@ -1,13 +1,12 @@
 <h1>編集</h1>
-  <form action="/memos/<%= @id %>" method="post">
-    <input type="hidden" name="_method" value="PATCH">
-    <input type="hidden" name="id" value="<%= @id %>">
+<form action="/memos/<%= @memo[:id] %>" method="post">
+  <input type="hidden" name="_method" value="PATCH">
   <h2>タイトル</h2>
-    <input type="text" name="title" value="<%= @title %>">
+    <input type="text" name="title" value="<%= @memo[:title] %>">
   <h2>本文</h2>
-    <textarea name="content" rows="5"><%= @content %></textarea>
+    <textarea name="content" rows="5"><%= @memo[:content] %></textarea>
     <input type="submit" value="保存">
-  </form>
+</form>
 <div>
   <a href="/memos">戻る</a>
 </div>
