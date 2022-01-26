@@ -13,5 +13,6 @@ sinatra-contrib (2.1.0)
 ```bash
 git clone
 cd memo_app
-ruby ruby memo.rb
+ruby memo.rb
 ```
+And open http://localhost:4567/memos
