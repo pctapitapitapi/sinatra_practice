@@ -1,11 +1,11 @@
 <div>
   <h1>
-    <%= CGI.escapeHTML(@memo[:title]) %>
+    <%= escape_html(@memo[:title]) %>
   </h1>
 </div>
 <div>
   <h2>
-    <%= CGI.escapeHTML(@memo[:content]) %>
+    <%= escape_html(@memo[:content]) %>
   </h2>
 </div>
 <div>
