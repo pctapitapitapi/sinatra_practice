@@ -19,9 +19,8 @@ end
 def find_memo(memos, id)
   if (memo = memos.find { |m| m[:id] == params[:id] })
     return memo
-  else
-    halt erb(:not_found)
   end
+  halt erb(:not_found)
 end
 
 get '/memos' do
