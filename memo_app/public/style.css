@@ -1,0 +1,23 @@
+body {
+  background-color: yellow;
+  text-align: center;
+}
+
+h1 {
+  color: green;
+}
+
+h2 {
+  color: green;
+}
+
+input, textarea {
+  background-color: aquamarine;
+}
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style-type: none;
+}

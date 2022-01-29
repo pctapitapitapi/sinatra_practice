@@ -1,0 +1,9 @@
+<h1>ぺろのメモアプリ</h1>
+<a href="/memos/new">新規作成</a>
+<ul>
+  <% if @memos != nil %>
+    <% @memos.each do |memo| %>
+      <li><a href="/memos/<%= memo[:id] %>"><%= escape_html(memo[:title]) %></a></li>
+    <% end %>
+  <% end %>
+</ul>
