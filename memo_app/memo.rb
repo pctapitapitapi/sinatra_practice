@@ -16,9 +16,16 @@ def open_file
   end
 end
 
+def find_memo(memos, id)
+  if (memo = memos.find { |m| m[:id] == params[:id] })
+    return memo
+  else
+    halt erb(:not_found)
+  end
+end
+
 get '/memos' do
-  memos = open_file
-  @memos = memos
+  @memos = open_file
   erb :index
 end
 
@@ -41,31 +48,21 @@ end
 
 get '/memos/:id' do
   memos = open_file
-  if (@memo = memos.find { |m| m[:id] == params[:id] })
-    erb :show
-  else
-    erb :not_found
-  end
+  @memo = find_memo(memos, params[:id])
+  erb :show
 end
 
 get '/memos/:id/edit' do
   memos = open_file
-  if (@memo = memos.find { |m| m[:id] == params[:id] })
-    erb :edit
-  else
-    erb :not_found
-  end
+  @memo = find_memo(memos, params[:id])
+  erb :edit
 end
 
 patch '/memos/:id' do
   memos = open_file
-  if (memo = memos.find { |m| m[:id] == params[:id] })
-    memo[:title] = params[:title]
-    memo[:content] = params[:content]
-  else
-    erb :not_found
-    break
-  end
+  memo = find_memo(memos, params[:id])
+  memo[:title] = params[:title]
+  memo[:content] = params[:content]
   File.open('memo.json', 'w') { |file| JSON.dump(memos, file) }
   redirect '/memos'
 end
