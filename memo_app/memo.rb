@@ -3,28 +3,34 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'erb'
-require 'json'
-require 'cgi'
+require 'pg'
 
-memos = nil
-
-def open_file
-  begin
-    JSON.parse(File.read('memo.json'), symbolize_names: true)
-  rescue JSON::ParserError => e
-    puts "ファイルが空です。ERROR: #{e}"
-  end
+def open_db
+  PG.connect(host: 'localhost', user: 'pctapitapitapi', dbname: 'mymemo', port: '5432')
 end
 
-def find_memo(memos, id)
-  if (memo = memos.find { |m| m[:id] == params[:id] })
-    return memo
-  end
-  halt erb(:not_found)
-end
+# def find_memo(connection, id)
+#   if (memo = connection.exec("SELECT * FROM mymemo WHERE id IN ('#{params[:id]}')"))
+#     memo
+#   else
+#     halt erb(:not_found)
+#   end
+# end
 
 get '/memos' do
-  @memos = open_file
+  connection = open_db
+  if connection.nil?
+    create_table_sql =
+      'CREATE TABLE mymemo (
+        id SERIAL,
+        title TEXT,
+        content TEXT,
+        PRIMARY KEY (id)
+      );'
+    @memos = connection.exec(create_table_sql)
+  else
+    @memos = connection.exec('SELECT * FROM mymemo ORDER BY id ASC;')
+  end
   erb :index
 end
 
@@ -33,50 +39,48 @@ get '/memos/new' do
 end
 
 post '/memos' do
-  memos = open_file
-  new_memo = {
-    id: SecureRandom.uuid,
-    title: params[:title],
-    content: params[:content],
-    create_at: Time.now
-  }
-  memos << new_memo
-  File.open('memo.json', 'w') { |file| JSON.dump(memos, file) }
+  connection = open_db
+  title = params[:title]
+  content = params[:content]
+  connection.exec(
+    'INSERT INTO mymemo (title, content) VALUES ($1, $2);', [title, content]
+  )
   redirect '/memos'
 end
 
 get '/memos/:id' do
-  memos = open_file
-  @memo = find_memo(memos, params[:id])
+  connection = open_db
+  id = params[:id]
+  @memo = connection.exec('SELECT * FROM mymemo WHERE id IN ($1);', [id])
   erb :show
 end
 
 get '/memos/:id/edit' do
-  memos = open_file
-  @memo = find_memo(memos, params[:id])
+  connection = open_db
+  id = params[:id]
+  @memo = connection.exec('SELECT * FROM mymemo WHERE id IN ($1);', [id])
   erb :edit
 end
 
 patch '/memos/:id' do
-  memos = open_file
-  memo = find_memo(memos, params[:id])
-  memo[:title] = params[:title]
-  memo[:content] = params[:content]
-  File.open('memo.json', 'w') { |file| JSON.dump(memos, file) }
+  connection = open_db
+  title = params[:title]
+  content = params[:content]
+  id = params[:id]
+  connection.exec(
+    'UPDATE mymemo
+    SET title = $1,
+    content = $2
+    WHERE id IN ($3);', [title, content, id]
+  )
   redirect '/memos'
 end
 
 delete '/memos/:id' do
-  memos = open_file
-  memos.delete_if { |n| n[:id] == params[:id] }
-  File.open('memo.json', 'w') { |file| JSON.dump(memos, file) }
+  connection = open_db
+  id = params[:id]
+  connection.exec('DELETE  FROM mymemo WHERE id IN ($1);', [id])
   redirect '/memos'
-end
-
-helpers do
-  def escape_html(text)
-    Rack::Utils.escape_html(text)
-  end
 end
 
 not_found do
