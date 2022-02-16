@@ -7,18 +7,19 @@ require 'pg'
 
 connection = nil
 
+# Databaseと繋ぎ情報を取得
 class Datebase
   def initialize
     @pg_instance = PG.connect(host: 'localhost', user: 'pctapitapitapi', dbname: 'mymemo', port: '5432')
   end
 
-  def get_db
+  def connect_to_db
     @pg_instance
   end
 end
 
 db_instance = Datebase.new
-connection = db_instance.get_db
+connection = db_instance.connect_to_db
 
 get '/memos' do
   @memos = connection.exec('SELECT * FROM mymemo ORDER BY id ASC;')
