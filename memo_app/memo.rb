@@ -5,32 +5,23 @@ require 'sinatra/reloader'
 require 'erb'
 require 'pg'
 
-def open_db
-  PG.connect(host: 'localhost', user: 'pctapitapitapi', dbname: 'mymemo', port: '5432')
+connection = nil
+
+class Datebase
+  def initialize
+    @pg_instance = PG.connect(host: 'localhost', user: 'pctapitapitapi', dbname: 'mymemo', port: '5432')
+  end
+
+  def get_db
+    @pg_instance
+  end
 end
 
-# def find_memo(connection, id)
-#   if (memo = connection.exec("SELECT * FROM mymemo WHERE id IN ('#{params[:id]}')"))
-#     memo
-#   else
-#     halt erb(:not_found)
-#   end
-# end
+db_instance = Datebase.new
+connection = db_instance.get_db
 
 get '/memos' do
-  connection = open_db
-  if connection.nil?
-    create_table_sql =
-      'CREATE TABLE mymemo (
-        id SERIAL,
-        title TEXT,
-        content TEXT,
-        PRIMARY KEY (id)
-      );'
-    @memos = connection.exec(create_table_sql)
-  else
-    @memos = connection.exec('SELECT * FROM mymemo ORDER BY id ASC;')
-  end
+  @memos = connection.exec('SELECT * FROM mymemo ORDER BY id ASC;')
   erb :index
 end
 
@@ -39,7 +30,6 @@ get '/memos/new' do
 end
 
 post '/memos' do
-  connection = open_db
   title = params[:title]
   content = params[:content]
   connection.exec(
@@ -48,22 +38,26 @@ post '/memos' do
   redirect '/memos'
 end
 
+def find_memo(connection, id)
+  if (memo = connection.exec("SELECT * FROM mymemo WHERE id IN (#{id});"))
+    return memo
+  end
+  halt erb(:not_found)
+end
+
 get '/memos/:id' do
-  connection = open_db
   id = params[:id]
-  @memo = connection.exec('SELECT * FROM mymemo WHERE id IN ($1);', [id])
+  @memo = find_memo(connection, id)
   erb :show
 end
 
 get '/memos/:id/edit' do
-  connection = open_db
   id = params[:id]
-  @memo = connection.exec('SELECT * FROM mymemo WHERE id IN ($1);', [id])
+  @memo = find_memo(connection, id)
   erb :edit
 end
 
 patch '/memos/:id' do
-  connection = open_db
   title = params[:title]
   content = params[:content]
   id = params[:id]
@@ -77,9 +71,8 @@ patch '/memos/:id' do
 end
 
 delete '/memos/:id' do
-  connection = open_db
   id = params[:id]
-  connection.exec('DELETE  FROM mymemo WHERE id IN ($1);', [id])
+  connection.exec('DELETE FROM mymemo WHERE id IN ($1);', [id])
   redirect '/memos'
 end
 
