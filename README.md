@@ -13,6 +13,15 @@ psql (PostgreSQL) 14.0
 ## How to set up
 - connect to PostgreSQL
 - create database mymemo
+- create table mymemo
+```bash
+CREATE TABLE mymemo (
+        id SERIAL,
+        title TEXT,
+        content TEXT,
+        PRIMARY KEY (id)
+);
+```
 
 ## How to connect
 ```bash
