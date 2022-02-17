@@ -7,7 +7,7 @@ require 'pg'
 
 connection = nil
 
-# Databaseと繋ぎ情報を取得
+# Databaseに繋ぐ
 class Datebase
   def initialize
     @pg_instance = PG.connect(host: 'localhost', user: 'pctapitapitapi', dbname: 'mymemo', port: '5432')
@@ -40,10 +40,12 @@ post '/memos' do
 end
 
 def find_memo(connection, id)
-  if (memo = connection.exec("SELECT * FROM mymemo WHERE id IN (#{id});"))
-    return memo
+  rows = connection.exec("SELECT * FROM mymemo WHERE id IN (#{id});")
+  if rows.first.nil?
+    halt erb(:not_found)
+  else
+    rows.first
   end
-  halt erb(:not_found)
 end
 
 get '/memos/:id' do
@@ -75,6 +77,12 @@ delete '/memos/:id' do
   id = params[:id]
   connection.exec('DELETE FROM mymemo WHERE id IN ($1);', [id])
   redirect '/memos'
+end
+
+helpers do
+  def escape_html(text)
+    Rack::Utils.escape_html(text)
+  end
 end
 
 not_found do
