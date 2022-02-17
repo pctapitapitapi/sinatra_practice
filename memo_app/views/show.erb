@@ -1,23 +1,21 @@
 <div>
   <h1>
-  <% @memo.each do |memo| %>
-    <%= memo['title'] %>
+    <%= escape_html(@memo['title']) %>
   </h1>
 </div>
 <div>
   <h2>
-    <%= memo['content'] %>
+    <%= escape_html(@memo['content']) %>
   </h2>
 </div>
 <div>
-  <a href="/memos/<%= memo['id'] %>/edit">編集</a>
+  <a href="/memos/<%= @memo['id'] %>/edit">編集</a>
 </div>
 <div>
-  <form action="/memos/<%= memo['id'] %>" method="post">
+  <form action="/memos/<%= @memo['id'] %>" method="post">
     <input type="hidden" name="_method" value="DELETE">
     <input type="submit" value="削除">
   </form>
-  <% end %>
 </div>
 <div>
   <a href="/memos">戻る</a>
